@@ -1,0 +1,1 @@
+from geomapharmonizer.handler import GeoMapHamonizer
