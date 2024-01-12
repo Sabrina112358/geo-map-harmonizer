@@ -234,6 +234,62 @@ class GeoMapHamonizer:
 
         return cross_table
 
+    def get_row_equivalence(
+        self,
+        cross_table: pandas.DataFrame,
+        name_map1: str,
+        name_map2: str
+    ) -> pandas.DataFrame:
+
+        row_mapping = []
+        for index, row in cross_table.iterrows():
+            max_row = row.sort_values(ascending=False)
+            row_mapping.append(cross_table.loc[:, max_row.index[0]])
+
+        row_mapping = pandas.DataFrame(data=row_mapping)
+
+        linhas = row_mapping.index.tolist()
+        colunas = row_mapping.columns.tolist()
+        data_tuples = list(zip(colunas, linhas))
+        row_mapping = pandas.DataFrame(
+            data_tuples, columns=[f"{name_map1}", f"{name_map2}"])
+
+        for i in range(len(row_mapping)):
+            row_mapping.loc[i, "size"] = cross_table.loc[(
+                row_mapping[f"{name_map1}"][i])].max()
+        return row_mapping
+
+    def get_column_equivalence(
+        self,
+        cross_table: pandas.DataFrame,
+        name_map1: str,
+        name_map2: str
+    ) -> pandas.DataFrame:
+
+        column_mapping = []
+        for column in range(0, cross_table.shape[1]):
+            max_column = cross_table.iloc[:,
+                                          column].sort_values(ascending=False)
+            column_mapping.append(cross_table.loc[max_column.index[0], :])
+
+        column_mapping = pandas.DataFrame(data=column_mapping)
+
+        linhas = column_mapping.index.tolist()
+        colunas = column_mapping.columns.tolist()
+
+        data_tuples = list(zip(colunas, linhas))
+        column_mapping = pandas.DataFrame(
+            data_tuples, columns=[f"{name_map1}", f"{name_map2}"]
+        )
+
+        column_mapping.loc[:, ("Size")] = 0
+
+        for i in range(len(column_mapping)):
+            column_mapping.loc[i, "Size"] = cross_table.loc[:,
+                                                            (column_mapping[f"{name_map1}"][i])].max()
+
+        return column_mapping
+
     def map_legend_harmonizer(self):
         if not self.check_maps_dependencies():
             raise Exception("As dependencias dos mapas não batem.")
@@ -245,6 +301,15 @@ class GeoMapHamonizer:
             path_map2=self.path_map2,
             null_value=self.null_value
         )
-        logging.debug(self.cross_table)
 
+        name_map1 = get_map_name(self.path_map1)
+        name_map2 = get_map_name(self.path_map2)
+
+        self.row_equivalence = self.get_row_equivalence(
+            self.cross_table, name_map1, name_map2)
+
+        self.column_equivalence = self.get_column_equivalence(
+            self.cross_table, name_map1, name_map2)
+
+        logging.info(self.column_equivalence)
         return None
