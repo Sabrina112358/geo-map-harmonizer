@@ -17,6 +17,33 @@ from geomapharmonizer.src.utils import (
 
 
 class GeoMapHamonizer:
+    """"
+    This package includes an algorithm specialized in harmonizing geotiff maps.
+    Its main function is to generate a harmonized legend based on the spatial
+    distribution of classes in two maps, aiming for maximum accuracy in
+    comparison.
+
+    Additionally, the package provides data analysis functions for detailed
+    reports. Specific strategies for handling Big Data are implemented, such as
+    dividing maps into smaller blocks and consolidating results.
+
+    In summary, the package provides an efficient and comprehensive solution
+    for harmonizing geotiff maps, integrating an advanced algorithm, analysis
+    tools, and strategies for dealing with large datasets.
+
+    Attributes
+    ---
+    path_map1: str
+        System path to the first map file in .tif format.
+    path_map2: str
+        System path to the second map file in .tif format.
+    logging_level: int = 20
+        Level of logs used in execution.
+    logging_format: str = '[%(asctime)s][%(levelname)s] %(message)s'
+        Format of logging output.
+    max_block_size: int = 100 * 1024 * 1024
+        Value of max legth of sub-block of each map
+    """
 
     def __init__(
             self,
@@ -24,16 +51,34 @@ class GeoMapHamonizer:
             path_map2: str,
             logging_level: int = logging.INFO,
             logging_format: str = '[%(asctime)s][%(levelname)s]  %(message)s',
-            max_block_size = 100 * 1024 * 1024
+            max_block_size=100 * 1024 * 1024,
+            null_value=0.0
     ) -> None:
+        """
+        Parameters
+        ---
+        path_map1: str
+            System path to the first map file in .tif format.
+        path_map2: str
+            System path to the second map file in .tif format.
+        logging_level: int = 20
+            Level of logs used in execution.
+        logging_format: str = '[%(asctime)s][%(levelname)s] %(message)s'
+            Format of logging output.
+        max_block_size: int = 100 * 1024 * 1024
+            Value of max legth of sub-block of each map
+        """
         self.path_map1 = path_map1
         self.path_map2 = path_map2
         logging.basicConfig(format=logging_format, level=logging_level)
         self.max_block_size = max_block_size
+        self.null_value = null_value
 
     def check_maps_dependencies(self) -> bool:
         """
-        Checa as dependencias dos mapas
+        Function to check map dependencies, such as dimension, projection and resolution.
+
+        Returns: bool
         """
 
         # Carrega os arquivos
@@ -60,7 +105,7 @@ class GeoMapHamonizer:
             "Os arquivos têm as mesmas dimensões, projeção e resolução.")
 
         return True
-    
+
     def get_cross_tables(self):
 
         # Read files
@@ -145,10 +190,61 @@ class GeoMapHamonizer:
         with open('./temp_cross_tables/class_list.txt', 'w') as fout:
             fout.write(json.dumps(class_list, cls=NpEncoder, indent=2))
 
+    def unify_cross_tables(
+        self,
+        path_map1: str,
+        path_map2: str,
+        null_value: float = 0.0
+    ) -> pandas.DataFrame:
+
+        with open('./temp_cross_tables/class_list.txt', 'r') as fout:
+            class_list = fout.read()
+
+        class_list = json.loads(class_list)
+
+        class_items = []
+        for key, value in class_list.items():
+            class_items = numpy.unique(numpy.concatenate((class_items, value)))
+
+        cross_table = pandas.DataFrame(
+            0, index=class_items, columns=class_items)
+
+        files = glob.glob("./temp_cross_tables/*.csv")
+
+        name_map1 = get_map_name(path_map=path_map1)
+        name_map2 = get_map_name(path_map=path_map2)
+
+        for filename in files:
+            classes = filename.split(f"{name_map1}_{name_map2}_")[
+                1].split(".csv")[0]
+            cross_table_block = pandas.read_csv(
+                filename,
+                names=class_list[classes]).set_axis(class_list[classes],
+                                                    axis='index')
+
+            for column in cross_table_block.columns:
+                for index in cross_table_block.index:
+                    cross_table.at[index, column] = cross_table.at[index,
+                                                                   column] + cross_table_block.at[index, column]
+
+        cross_table = cross_table.loc[(cross_table != 0.0).any(axis=1)]
+        cross_table = cross_table.loc[:, (cross_table != 0.0).any(axis=0)]
+
+        cross_table = cross_table.drop(index=null_value, columns=null_value)
+
+        return cross_table
+
     def map_legend_harmonizer(self):
         if not self.check_maps_dependencies():
             raise Exception("As dependencias dos mapas não batem.")
-        
+
         self.get_cross_tables()
+
+        self.cross_table = self.unify_cross_tables(
+            path_map1=self.path_map1,
+            path_map2=self.path_map2,
+            null_value=self.null_value
+        )
+        logging.debug(self.cross_table)
 
         return None
