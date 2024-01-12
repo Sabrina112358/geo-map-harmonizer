@@ -255,7 +255,7 @@ class GeoMapHamonizer:
             data_tuples, columns=[f"{name_map1}", f"{name_map2}"])
 
         for i in range(len(row_mapping)):
-            row_mapping.loc[i, "size"] = cross_table.loc[(
+            row_mapping.loc[i, "Size"] = cross_table.loc[(
                 row_mapping[f"{name_map1}"][i])].max()
         return row_mapping
 
@@ -290,6 +290,10 @@ class GeoMapHamonizer:
 
         return column_mapping
 
+    def get_legend_harmonizer(self, row_equivalence, column_equivalence) -> pandas.DataFrame:
+        legend = pandas.merge(row_equivalence, column_equivalence, how="outer")
+        return legend
+
     def map_legend_harmonizer(self):
         if not self.check_maps_dependencies():
             raise Exception("As dependencias dos mapas não batem.")
@@ -311,5 +315,6 @@ class GeoMapHamonizer:
         self.column_equivalence = self.get_column_equivalence(
             self.cross_table, name_map1, name_map2)
 
-        logging.info(self.column_equivalence)
+        self.legend = self.get_legend_harmonizer(self.row_equivalence, self.column_equivalence)
+        logging.info(self.legend)
         return None
