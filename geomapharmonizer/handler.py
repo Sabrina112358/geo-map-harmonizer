@@ -106,7 +106,9 @@ class GeoMapHamonizer:
 
         return True
 
-    def get_cross_tables(self):
+    def get_cross_tables(self) -> None:
+        """Method to generate cross tables files
+        """
 
         # Read files
         dataset1 = gdal.Open(self.path_map1)
@@ -196,6 +198,16 @@ class GeoMapHamonizer:
         path_map2: str,
         null_value: float = 0.0
     ) -> pandas.DataFrame:
+        """Method to unify all cross tables files in a pandas.DataFrame
+
+        Args:
+            path_map1 (str): System path to the first map file in .tif format.
+            path_map2 (str): System path to the second map file in .tif format.
+            null_value (float, optional): Value of null value in the maps files. Defaults to 0.0.
+
+        Returns:
+            pandas.DataFrame: DataFrame with the unify cross tables
+        """
 
         with open('./temp_cross_tables/class_list.txt', 'r') as fout:
             class_list = fout.read()
@@ -240,6 +252,16 @@ class GeoMapHamonizer:
         name_map1: str,
         name_map2: str
     ) -> pandas.DataFrame:
+        """Method to generate the Row Equivalence in cross tables
+
+        Args:
+            cross_table (pandas.DataFrame): DataFrame with contains the cross table
+            name_map1 (str): Name of the first map
+            name_map2 (str): Name of the second map
+
+        Returns:
+            pandas.DataFrame: DataFrame with contains the row equivalence
+        """
 
         row_mapping = []
         for index, row in cross_table.iterrows():
@@ -265,6 +287,16 @@ class GeoMapHamonizer:
         name_map1: str,
         name_map2: str
     ) -> pandas.DataFrame:
+        """Method to generate the Column Equivalence in cross tables
+
+        Args:
+            cross_table (pandas.DataFrame): DataFrame with contains the cross table
+            name_map1 (str): Name of the first map
+            name_map2 (str): Name of the second map
+
+        Returns:
+            pandas.DataFrame: DataFrame with contains the column equivalence
+        """
 
         column_mapping = []
         for column in range(0, cross_table.shape[1]):
@@ -290,13 +322,34 @@ class GeoMapHamonizer:
 
         return column_mapping
 
-    def get_legend_harmonizer(self, row_equivalence, column_equivalence) -> pandas.DataFrame:
+    def get_legend_harmonizer(
+            self,
+            row_equivalence: pandas.DataFrame,
+            column_equivalence: pandas.DataFrame
+            ) -> pandas.DataFrame:
+        """Method to harmonizer the row and column equivalences
+
+        Args:
+            row_equivalence (pandas.DataFrame): DataFrame with contains the row equivalence
+            column_equivalence (pandas.DataFrame): DataFrame with contains the column equivalence
+
+        Returns:
+            pandas.DataFrame: DataFrame with contains the legend harmonizer
+        """
         legend = pandas.merge(row_equivalence, column_equivalence, how="outer")
         return legend
 
-    def map_legend_harmonizer(self):
+    def map_legend_harmonizer(self) -> pandas.DataFrame:
+        """Method to run all steps to generate a harmonizer legend
+
+        Raises:
+            Exception: The map dependencies don't match.
+
+        Returns:
+            pandas.DataFrame: DataFrame with contains the legend harmonizer
+        """
         if not self.check_maps_dependencies():
-            raise Exception("As dependencias dos mapas não batem.")
+            raise Exception("The map dependencies don't match.")
 
         self.get_cross_tables()
 
@@ -317,4 +370,4 @@ class GeoMapHamonizer:
 
         self.legend = self.get_legend_harmonizer(self.row_equivalence, self.column_equivalence)
         logging.info(self.legend)
-        return None
+        return self.legend
