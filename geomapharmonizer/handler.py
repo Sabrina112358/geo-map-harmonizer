@@ -369,5 +369,6 @@ class GeoMapHarmonizer:
             self.cross_table, name_map1, name_map2)
 
         self.legend = self.get_legend_harmonizer(self.row_equivalence, self.column_equivalence)
-        logging.info(self.legend)
+        logging.debug(self.legend)
+        logging.info("Legendas geradas com sucesso")
         return self.legend

@@ -1,1 +1,1 @@
-from geomapharmonizer.handler import GeoMapHamonizer
+from geomapharmonizer.handler import GeoMapHarmonizer
