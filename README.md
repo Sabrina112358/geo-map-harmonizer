@@ -1,4 +1,4 @@
-# Geo Map Harmonizer (WIP)
+# Geo Map Harmonizer
 
 This package includes an algorithm specialized in harmonizing geotiff maps.
 Its main function is to generate a harmonized legend based on the spatial 
