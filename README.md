@@ -1,17 +1,20 @@
 # Geo Map Harmonizer
 
-This package includes an algorithm specialized in harmonizing geotiff maps.
-Its main function is to generate a harmonized legend based on the spatial 
-distribution of classes in two maps, aiming for maximum accuracy in comparison.
+This package houses an algorithm specialized in harmonizing legends of GeoTIFF maps. Its primary function is the generation of a harmonized legend, based on the spatial distribution of classes in two maps, aiming to achieve maximum concordance between them. The algorithm can handle a variety of map types, especially Land Use and Land Cover (LULC) maps.
 
-Additionally, the package provides data analysis functions for detailed
-reports. Specific strategies for handling Big Data are implemented, such as
-dividing maps into smaller blocks and consolidating results.
+In addition to this core functionality, the package offers a set of data analysis functions for generating detailed reports. These analyses aim to provide insights into the characteristics of the processed maps, allowing a deeper understanding of the spatial dynamics of classes.
+
+The package has been designed with specific strategies to handle Big Data. The implementation of techniques such as map division into smaller blocks and efficient result consolidation contributes to the scalability of the package, making it suitable for large-scale analyses.
+
+Feel free to explore and integrate this package into your projects, leveraging its map harmonization and data analysis functionalities for your geospatial studies. If you have any questions or suggestions, please feel free to contact us.
+
 
 ## Installation
 
-1 - Install [GDAL](https://github.com/OSGeo/gdal) on your system.
-2 - Install [Python GDAL Library](https://pypi.org/project/GDAL/)
+1 - Install [GDAL](https://github.com/OSGeo/gdal) on your system;
+
+2 - Install [Python GDAL Library](https://pypi.org/project/GDAL/);
+
 3 - Install Geo Map Harmonizer with `pip install geo-map-harmonizer`.
 
 
