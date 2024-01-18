@@ -16,7 +16,7 @@ from geomapharmonizer.src.utils import (
 )
 
 
-class GeoMapHamonizer:
+class GeoMapHarmonizer:
     """"
     This package includes an algorithm specialized in harmonizing geotiff maps.
     Its main function is to generate a harmonized legend based on the spatial
